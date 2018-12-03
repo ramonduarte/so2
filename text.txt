@@ -1,0 +1,37 @@
+['solomons.py']
+New route:   2 =>   4 =>   6 and back to depot
+weight: 18.569541314321636
+New route:  11 =>   9 =>  10 and back to depot
+weight: 17.37820360123074
+New route:   3 =>   1 =>   5 and back to depot
+weight: 16.812559200041264
+New route:  12 =>   8 =>   7 and back to depot
+weight: 17.576491222541478
+New route:   2 =>   4 =>   6 and back to depot
+weight: 18.569541314321636
+New route:  11 =>   9 =>  10 and back to depot
+weight: 17.37820360123074
+New route:   3 =>   1 =>   5 and back to depot
+weight: 16.812559200041264
+New route:  12 =>   8 =>   7 and back to depot
+weight: 17.576491222541478
+New route:   2 =>   4 =>   6 and back to depot
+weight: 18.569541314321636
+New route:  11 =>   9 =>  10 and back to depot
+weight: 17.37820360123074
+New route:   3 =>   1 =>   5 and back to depot
+weight: 16.812559200041264
+New route:  12 =>   8 =>   7 and back to depot
+weight: 17.576491222541478
+New route:   2 =>   4 =>   6 and back to depot
+weight: 18.569541314321636
+New route:  11 =>   9 =>  10 and back to depot
+weight: 17.37820360123074
+New route:   3 =>   1 =>   5 and back to depot
+weight: 16.812559200041264
+New route:  12 =>   8 =>   7 and back to depot
+weight: 17.576491222541478
+[0, [{'path': [0, 2, 4, 6, 0], 'weight': 12.912687064829255, 'demand': 6, 'surplus': 0}, {'path': [0, 11, 9, 10, 0], 'weight': 11.721349351738361, 'demand': 18, 'surplus': 0}, {'path': [0, 3, 1, 5, 0], 'weight': 11.812559200041264, 'demand': 6, 'surplus': 0}, {'path': [0, 12, 8, 7, 0], 'weight': 12.576491222541474, 'demand': 20, 'surplus': 0}]]
+[1, [{'path': [0, 2, 4, 6, 0], 'weight': 12.912687064829255, 'demand': 6, 'surplus': 0}, {'path': [0, 11, 9, 10, 0], 'weight': 11.721349351738361, 'demand': 18, 'surplus': 0}, {'path': [0, 3, 1, 5, 0], 'weight': 11.812559200041264, 'demand': 6, 'surplus': 0}, {'path': [0, 12, 8, 7, 0], 'weight': 12.576491222541474, 'demand': 20, 'surplus': 0}]]
+[0, [{'path': [0, 2, 4, 6, 0], 'weight': 12.912687064829255, 'demand': 6, 'surplus': 0}, {'path': [0, 11, 9, 10, 0], 'weight': 11.721349351738361, 'demand': 18, 'surplus': 0}, {'path': [0, 3, 1, 5, 0], 'weight': 11.812559200041264, 'demand': 6, 'surplus': 0}, {'path': [0, 12, 8, 7, 0], 'weight': 12.576491222541474, 'demand': 20, 'surplus': 0}]]
+[3, [{'path': [0, 2, 4, 6, 0], 'weight': 12.912687064829255, 'demand': 6, 'surplus': 0}, {'path': [0, 11, 9, 10, 0], 'weight': 11.721349351738361, 'demand': 18, 'surplus': 0}, {'path': [0, 3, 1, 5, 0], 'weight': 11.812559200041264, 'demand': 6, 'surplus': 0}, {'path': [0, 12, 8, 7, 0], 'weight': 12.576491222541474, 'demand': 20, 'surplus': 0}]]
