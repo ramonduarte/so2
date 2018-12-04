@@ -8,11 +8,11 @@ from sys import argv
 from functools import partial
 from multiprocessing import Pool, Array, current_process, Queue
 from timeit import default_timer as timer
+from time import sleep
 
-# from solomons import powerset, weight, total_distance
 from google_or_16 import *
 
-log = logging.getLogger("solomons.log")
+log = logging.getLogger("potvin_rousseau.log")
 
 def powerset(iterable, lb=1):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -29,10 +29,12 @@ def total_distance(G, route):
 def total_demand(G, route):
     return sum([G.node[i]["demand"] for i in route])
 
+def total_service_time(G, route):
+    raise NotImplementedError
+
 
 def solomons(locations, demands, capacities, time_windows=None):
     G = nx.Graph(instance=name)
-    # start = timer()
     solution = []
 
     for i in range(len(locations)):
@@ -47,19 +49,12 @@ def solomons(locations, demands, capacities, time_windows=None):
                         (locations[i][0]-locations[j][0])**2
                             + (locations[i][1]-locations[j][1])**2))
 
-    total_demand = sum(demands)
-    
-    # print(G.node[2]["demand"])
-    # print(G.nodes[2]["demand"])
-
-    # TODO: add some bullshit calculations 2018-12-01 22:10:32
-
     for truck in capacities:
         # find nearest unattended customer
         current_node = 0
         nearest_neighbor = None
         min_distance = 9999999999
-        min_weight = 9999999999
+        # min_weight = 9999999999
         furthest_neighbor = None
         max_distance = 0
 
@@ -107,19 +102,18 @@ def solomons(locations, demands, capacities, time_windows=None):
                 route["demand"] += current_node_demand
                 
             G.node[current_node]["status"] = 1
-            # # print("(capacity left {})".format(truck), end=" ")
             min_distance = 9999999999
 
-        # print("{:>3} and back to depot".format(current_node))
+        print("{:>3} and back to depot".format(current_node))
         try:
             this_solution_distance = sum([G.get_edge_data(route["path"][x],
                                       route["path"][x+1])["weight"]
                                       for x in range(len(route["path"]) - 1)]) \
                                       + G.get_edge_data(route["path"][-1], 0)["weight"] \
                                       + G.get_edge_data(route["path"][1], 0)["weight"]
-            # print("weight: {}".format(this_solution_distance))
+            print("weight: {}".format(this_solution_distance))
         except:
-            # print(route)
+            print(route)
             pass
         
         route["weight"] += G.get_edge_data(route["path"][-1], 0)["weight"] \
@@ -129,7 +123,6 @@ def solomons(locations, demands, capacities, time_windows=None):
         route["path"].append(0)
         solution.append(route)
 
-    # print(solution, end="\n\n")
 
 #     global rotas
 #     rotas.put([current_process()._identity[0] - 1, solution])
@@ -175,6 +168,7 @@ def build_routes(parameters: tuple, capacities: list, seeds: list, g: nx.Graph):
                                 total_distance(G, [route["path"][node], customer, route["path"][node+1]]) * parameters[0]
                                 # TODO: change it to total service time, not total distance
                                 + total_distance(G, [route["path"][node+1], customer, route["path"][node+1]]) * parameters[1]
+                                # + total_service_time(G, [route["path"][node+1], customer, route["path"][node+1]]) * parameters[1]
                             )
                             # print(route["path"], " cost = ", cost, " min cost = ", min_cost)
                             if min_cost > cost:
@@ -234,24 +228,21 @@ def build_routes(parameters: tuple, capacities: list, seeds: list, g: nx.Graph):
 
         G.node[customer]["status"] = 1
 
-    for x in solution:
-        print(x)
-    print("\n")
-    
+    # sleep(60)
     return solution
         
 
-def potvin_rousseau(locations, demands, capacities, time_windows=None, name="instance", threads=1):
+def potvin_rousseau(locations, demands, capacities, time_windows, name="instance", threads=1):
     # STEP 1: how many vehicles are needed?
     solomons_result = solomons(locations, demands, capacities, time_windows)
-    k = len(solomons_result)  # number of vehicles
+    # k = len(solomons_result)  # number of vehicles
     starting_nodes = [x["path"][1] for x in solomons_result]
 
     # building graph
     G = nx.Graph(instance=name)
 
     for i in range(len(locations)):
-        G.add_node(i, location=locations[i], demand=demands[i], status=0)
+        G.add_node(i, location=locations[i], demand=demands[i], time_windows=time_windows[i], status=0)
 
     for i in range(len(locations)):
         for j in range(len(locations)):
@@ -262,8 +253,10 @@ def potvin_rousseau(locations, demands, capacities, time_windows=None, name="ins
                         (locations[i][0]-locations[j][0])**2
                             + (locations[i][1]-locations[j][1])**2))
     
-    solomons_parameters = [(0.5, 0.5), (0.75, 0.25), (1.0, 0.0),]
-    #     chosen_parameter = solomons_parameters.pop(randint(0, len(solomons_parameters)-1))
+    solomons_parameters = [(0.5, 0.5), (0.75, 0.25), (1.0, 0.0), (0.6, 0.4),
+                           (0.525, 0.475), (0.725, 0.275), (0.95, 0.05), (0.625, 0.375),
+                           (0.55, 0.45), (0.775, 0.225), (0.9, 0.1), (0.65, 0.35),
+                           (0.575, 0.425), (0.8, 0.2), (0.85, 0.15), (0.675, 0.325),]
     solutions = []
 
     pt = partial(build_routes,
@@ -272,13 +265,14 @@ def potvin_rousseau(locations, demands, capacities, time_windows=None, name="ins
              g=G)
 
     with Pool(threads) as t:
-        t.map(pt, solomons_parameters)
+        solutions = t.map(pt, solomons_parameters[:threads])
         t.close()
         t.join()
     
     return solutions
 
-potvin_rousseau(locations, demands, capacities, threads=3)
+if __name__ == "__main__":
+    potvin_rousseau(locations, demands, capacities, time_windows, threads=3)
 
 
 # rotas = Queue()

@@ -1,0 +1,42 @@
+solution 1
+	route 1
+		path : [0, 6, 5, 8, 2, 0]
+		weight : 16.282170362793455
+		demand : 15
+		surplus : 0
+	route 2
+		path : [0, 11, 12, 13, 15, 0]
+		weight : 14.838896747497845
+		demand : 15
+		surplus : 0
+	route 3
+		path : [0, 7, 1, 4, 3, 0]
+		weight : 11.99070478491457
+		demand : 15
+		surplus : 0
+	route 4
+		path : [0, 9, 14, 10, 16, 0]
+		weight : 14.640986324787455
+		demand : 15
+		surplus : 0
+solution 2
+	route 1
+		path : [0, 5, 8, 6, 2, 0]
+		weight : 12.957417329238151
+		demand : 15
+		surplus : 0
+	route 2
+		path : [0, 12, 11, 13, 15, 0]
+		weight : 14.88362701190674
+		demand : 15
+		surplus : 0
+	route 3
+		path : [0, 7, 4, 1, 3, 0]
+		weight : 12.89292222699217
+		demand : 15
+		surplus : 0
+	route 4
+		path : [0, 9, 14, 10, 16, 0]
+		weight : 14.640986324787455
+		demand : 15
+		surplus : 0
