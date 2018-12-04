@@ -104,16 +104,16 @@ def solomons(locations, demands, capacities, time_windows=None):
             G.node[current_node]["status"] = 1
             min_distance = 9999999999
 
-        print("{:>3} and back to depot".format(current_node))
+        # print("{:>3} and back to depot".format(current_node))
         try:
             this_solution_distance = sum([G.get_edge_data(route["path"][x],
                                       route["path"][x+1])["weight"]
                                       for x in range(len(route["path"]) - 1)]) \
                                       + G.get_edge_data(route["path"][-1], 0)["weight"] \
                                       + G.get_edge_data(route["path"][1], 0)["weight"]
-            print("weight: {}".format(this_solution_distance))
+            # print("weight: {}".format(this_solution_distance))
         except:
-            print(route)
+            # print(route)
             pass
         
         route["weight"] += G.get_edge_data(route["path"][-1], 0)["weight"] \
@@ -264,8 +264,11 @@ def potvin_rousseau(locations, demands, capacities, time_windows, name="instance
              seeds=starting_nodes,
              g=G)
 
+    # multithreaded execution
     with Pool(threads) as t:
         solutions = t.map(pt, solomons_parameters[:threads])
+        
+        # force faster threads to wait
         t.close()
         t.join()
     
