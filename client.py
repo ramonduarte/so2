@@ -28,10 +28,27 @@ class Prompt(cmd.Cmd):
         print(
             """
             Commands available in interactive mode:
-            commands               Show list of commands available in interactive mode.
-            customers                 Show list of commands available in interactive mode.
-            add                    Show list of commands available in interactive mode.
-            change                 Show list of commands available in interactive mode.
+            commands                             Show list of commands available in interactive mode.
+            customers <int>                      Change number of customers.
+            demands [[<int>, <int>]]             Change demands of customers.
+            locations [[<int>, [<int>, <int>]]]  Change location of customers.
+            capacities [[<int>, <int>]]          Change capacity of vehicles.
+            vehicles <int>                       Change number of vehicles.
+            update                               Retrieve last run from socked.
+            examples                             Show list of examples.
+            """
+        )
+        return True
+
+    def do_examples(self, inp):
+        print(
+            """
+            Some examples:
+            customers 15                         Reduce graph to at most 15 customers.
+            demands [[15, 6], [7, 5]]            Change demand of customers 15 and 7 to 6 and 5, respectively (0 is not a customer).
+            locations [[1, [0,0]], [12, [8,5]]]  Change location of customers 1 and 12 to [x=0, y=0] and [x=8, y=5], respectively (on a 2D planar graph).
+            capacities [[0, 18], [1, 25]]        Change capacity of trucks 0 and 1 to 18 and 25, respectively.
+            vehicles 5                           Change number of vehicles to at most 5.
             """
         )
         return True
