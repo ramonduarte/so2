@@ -9,9 +9,11 @@ import asyncio
 import signal
 from time import sleep
 
-log = logging.getLogger("client.log")
+logging.basicConfig(filename="client.log")
 exit_flag = False
 message = {}
+sock = None
+solutions = []
 
 class Prompt(cmd.Cmd):
     prompt = "client> "
@@ -35,58 +37,106 @@ class Prompt(cmd.Cmd):
         return True
 
     def do_customers(self, inp):
-        # example: customers 12
-        global message
+        # example: customers 15
+        global message, sock
         message["n"] = int(inp)
-
         sock.sendall((json.dumps(message) + "\n\n").encode())
-        print(message)
         return True
 
     def do_demands(self, inp):
         # example: demands [[15, 6], [7, 5]]
-        global message
+        global message, sock
         demands = json.loads(inp)
         message["demands"] = demands
-
         sock.sendall((json.dumps(message) + "\n\n").encode())
-        print(message)
         return True
         
     def do_locations(self, inp):
-        # example: locations [[1, (0,0)], [12, (8,5)]]
-        global message
+        # example: locations [[1, [0,0]], [12, [8,5]]]
+        global message, sock
         locations = json.loads(inp)
         message["locations"] = locations
-        
         sock.sendall((json.dumps(message) + "\n\n").encode())
-        print(message)
         return True
         
     def do_capacities(self, inp):
         # example: capacities [[0, 18], [1, 25]]
-        global message
+        global message, sock
         capacities = json.loads(inp)
         message["capacities"] = capacities
-
         sock.sendall((json.dumps(message) + "\n\n").encode())
-        print(message)
         return True
         
     def do_vehicles(self, inp):
         # example: vehicles 5
-        global message
+        global message, sock
         message["k"] = int(inp)
-        
         sock.sendall((json.dumps(message) + "\n\n").encode())
-        print(message)
+        return True
+        
+    def do_update(self, inp):
+        message_received = b""
+        while True:
+            data = sock.recv(128)
+            message_received += data
+            if message_received.endswith("\n\n".encode()):
+                break
+        print(message_received.decode())
+        
+        solutions = json.loads(message_received.decode())
+        if type(solutions) == type(" "):
+            print("message: " + solutions)
+            return True
+        
+        i = 0
+        j = 0
+        for solution in solutions:
+            i += 1
+            print("solution " + str(i))
+            for route in solution:
+                j += 1
+                print("\troute " + str(j))
+                for key, value in route.items():
+                    print("\t\t" + key + " : " + str(value))
+            j = 0
+
         return True
 
     do_EOF = do_exit
 
+    def postloop(self):
+        try:
+            sleep(2)
+            message_received = b""
+            while True:
+                data = sock.recv(128)
+                message_received += data
+                if message_received.endswith("\n\n".encode()):
+                    break
 
-def handler(sig, frame):
-    return
+            solutions = json.loads(message_received.decode()[:-2])
+            if type(solutions) == type(" "):
+                print("message: " + solutions)
+                return True
+
+            i = 0
+            j = 0
+            for solution in solutions:
+                i += 1
+                print("solution " + str(i))
+                for route in solution:
+                    j += 1
+                    print("\troute " + str(j))
+                    for key, value in route.items():
+                        print("\t\t" + key + " : " + str(value))
+                j = 0
+            
+
+            sock.sendall("\n\n".encode())
+        except:
+            pass
+        finally:
+            return True
 
 
 def echo_cmd():
@@ -103,142 +153,76 @@ def echo_cmd():
 def hello(threads, infile, outfile, demo):
     click.echo('Running Potvin-Rousseau CVRPTW algorithm with ' + str(threads) + " threads.")
 
-    sock = socket.create_connection(('localhost', 8000))
-
-    # Quick protocol
-    ## n -> int  =>  graph becomes n-graph
-    ## demands -> list([customer, demand])  =>  G.nodes[customer]["demand"] = demand
-    ## locations -> list([customer, tuple(x, y)])  =>  G.nodes[customer]["location"] = tuple
-    ## capacities -> list([truck, capacity])  =>  capacities[truck] = capacity
-    ## k -> int  =>  len(capacities) = k
-    global message
+    global message, solutions
     message = {
         "threads": threads,
         "infile": infile,
         "demo": demo,
+        ## n -> int  =>  graph becomes n-graph
         "n": None,
+        ## demands -> list([customer, demand])  =>  G.nodes[customer]["demand"] = demand
         "demands": None,
+        ## locations -> list([customer, tuple(x, y)])  =>  G.nodes[customer]["location"] = tuple
         "locations": None,
+        ## capacities -> list([truck, capacity])  =>  capacities[truck] = capacity
         "capacities": None,
+        ## k -> int  =>  len(capacities) = k
         "k": None,
     }
     sock.sendall((json.dumps(message) + "\n\n").encode())
-    print(message)
 
-    # Look for the response
-    # amount_received = 0
-    # amount_expected = len(message)
     message_received = b''
 
-    pool = multiprocessing.Pool(processes=2)
-    #     # CLI interface must have its own thread
-    #     # interface = multiprocessing.Process(target=hello)
-
-        # real-time features run silently after interface initialized
-        # pool.apply_async(hello)
-    print("While you wait")
-    pmt = Prompt()
-        # pool.apply_async(pmt.cmdloop())
-    try:
-        while not exit_flag:
+    while not exit_flag:
+        try:
+            pool = multiprocessing.Pool(processes=2)
+            pmt = Prompt()
             pool.apply_async(pmt.cmdloop())
+            pool.get(60)
 
-            data = sock.recv(64)
-            message_received += data
+            while True:
+                data = sock.recv(128)
+                message_received += data
 
-            if message_received.endswith("\n\n".encode()):
-                break
-    except:
-        pass
-    finally:
-        while True:
-            data = sock.recv(64)
-            message_received += data
+                if message_received.endswith("\n\n".encode()):
+                    break
+            print(message_received.decode())
+            solutions = json.loads(message_received.decode())
+        except:
+            sleep(1)
+        finally:
 
-            if message_received.endswith("\n\n".encode()):
-                break
+            if type(solutions) == type(" "):
+                print("message: " + solutions)
 
-        
+            elif outfile:
+                with open(outfile, 'w') as o:
+                    i = 0
+                    j = 0
+                    for solution in solutions:
+                        i += 1
+                        o.write("solution " + str(i) + "\n")
+                        for route in solution:
+                            j += 1
+                            o.write("\troute " + str(j) + "\n")
+                            for key, value in route.items():
+                                o.write("\t\t" + key + " : " + str(value) + "\n")
+                        j = 0
 
-
-    # while True:
-        # data = sock.recv(64)
-        # message_received += data
-
-        # if message_received.endswith("\n\n".encode()):
-        #     break
-
-    # finally:
-
-    pool.close()
-    pool.join()
-    message = message_received.decode()[:-2]
-    solutions = json.loads(message)
-    print(solutions)
-
-    if outfile:
-        with open(outfile, 'w') as o:
-            i = 0
-            j = 0
-            for solution in solutions:
-                i += 1
-                o.write("solution " + str(i) + "\n")
-                for route in solution:
-                    j += 1
-                    o.write("\troute " + str(j) + "\n")
-                    for key, value in route.items():
-                        o.write("\t\t" + key + " : " + str(value) + "\n")
-                j = 0
-
-    # await asyncio.sleep(10)
     print('closing socket')
+    logging.warning('closing socket')
     sock.close()
 
 
-# Create a TCP/IP socket
-# sock = socket.create_connection(('localhost', 8000))
-
 if __name__ == "__main__":
+    sock = socket.create_connection(('localhost', 8000))
     while True:
         try:
-            # CLI interface must have its own thread
-            # interface = multiprocessing.Process(target=hello)
-            # interface = multiprocessing.Process(target=hello)
-            # loop = asyncio.get_event_loop()
-            # task = loop.create_task(hello())
-            # loop.run_until_complete(task)
-            # print("While you wait")
-            # cmd = multiprocessing.Process(target=Prompt.cmdloop)
-
-
-            # CLI interface must have its own thread
-            # interface = multiprocessing.Process(target=hello)
-            # interface = multiprocessing.Process(target=hello)
-            # loop = asyncio.get_event_loop()
-            # task = loop.create_task(hello())
-            # loop.run_until_complete(task)
-            # print("While you wait")
-            # cmd = multiprocessing.Process(target=Prompt.cmdloop)
-
-            # real-time features run silently after interface initialized
-            # print("While you wait")
-            # # for p in (interface, cmd):
-            # #     p.start()
-
-            # with multiprocessing.Pool(processes=2) as pool:
-            #     # CLI interface must have its own thread
-            #     # interface = multiprocessing.Process(target=hello)
-
-            #     # real-time features run silently after interface initialized
-            #     pool.apply_async(hello)
-            #     print("While you wait")
-            # pmt = Prompt()
-            # pmt.cmdloop()
-                # pool.apply(pmt.cmdloop)
             hello()
         except Exception as identifier:
-            log.error("Client failed: " + str(identifier))
+            logging.error("Client failed: " + repr(identifier))
+            print("Client failed: " + repr(identifier))
         finally:
-            # log.info("Restarting client...")
+            logging.info("Restarting client...")
             break
     

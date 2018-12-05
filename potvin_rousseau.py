@@ -135,8 +135,10 @@ from random import randint
 def build_routes(parameters: tuple, capacities: list, seeds: list, g: nx.Graph):
     G = nx.Graph(g)  # do not change graph in place
     solution = []
+    capacities = sorted(capacities)
     
-    assert len(seeds) == len(capacities)
+    while len(seeds) != len(capacities):
+        capacities.pop(0)
     assert sum(parameters) == 1.0
     
     c = 0
@@ -234,9 +236,11 @@ def build_routes(parameters: tuple, capacities: list, seeds: list, g: nx.Graph):
 
 def potvin_rousseau(locations, demands, capacities, time_windows, name="instance", threads=1):
     # STEP 1: how many vehicles are needed?
+    start = timer()
     solomons_result = solomons(locations, demands, capacities, time_windows)
     # k = len(solomons_result)  # number of vehicles
     starting_nodes = [x["path"][1] for x in solomons_result]
+    solomons_time = timer() - start
 
     # building graph
     G = nx.Graph(instance=name)
@@ -265,6 +269,7 @@ def potvin_rousseau(locations, demands, capacities, time_windows, name="instance
              g=G)
 
     # multithreaded execution
+    start = timer()
     with Pool(threads) as t:
         solutions = t.map(pt, solomons_parameters[:threads])
         
@@ -272,10 +277,13 @@ def potvin_rousseau(locations, demands, capacities, time_windows, name="instance
         t.close()
         t.join()
     
-    return solutions
+    parallel_timer = timer() - start
+
+    speedup = solomons_time / parallel_timer
+    return [solutions, speedup]
 
 if __name__ == "__main__":
-    potvin_rousseau(locations, demands, capacities, time_windows, threads=3)
+    print(potvin_rousseau(locations[:13], demands[:13], capacities + [20], time_windows[:13], threads=3))
 
 
 # rotas = Queue()

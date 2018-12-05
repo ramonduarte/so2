@@ -1,0 +1,23 @@
+ERROR:root:Connection closed: [Errno 98] Address already in use
+ERROR:root:Connection closed: [Errno 98] Address already in use
+ERROR:root:Connection closed: [Errno 98] Address already in use
+ERROR:root:Connection closed: [Errno 98] Address already in use
+ERROR:root:Server failed: name 'demands' is not defined
+ERROR:root:Connection closed.
+ERROR:root:Connection closed: [Errno 98] Address already in use
+ERROR:root:Server failed: import_module() got an unexpected keyword argument 'globals'
+ERROR:root:Connection closed.
+ERROR:root:Server failed: No module named 'google_or_16.*'; 'google_or_16' is not a package
+ERROR:root:Connection closed.
+ERROR:root:Server failed: name 'demands' is not defined
+ERROR:root:Connection closed.
+ERROR:root:Server failed: name 'time_windows' is not defined
+ERROR:root:Connection closed.
+ERROR:root:Server failed: must be str, not list
+ERROR:root:Connection closed.
+ERROR:root:Server failed: must be str, not list
+ERROR:root:Connection closed.
+ERROR:root:Server failed: TypeError('must be str, not float',)
+ERROR:root:Connection closed.
+ERROR:root:Server failed: TypeError('must be str, not float',)
+ERROR:root:Connection closed.
