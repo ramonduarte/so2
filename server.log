@@ -21,3 +21,4 @@ ERROR:root:Server failed: TypeError('must be str, not float',)
 ERROR:root:Connection closed.
 ERROR:root:Server failed: TypeError('must be str, not float',)
 ERROR:root:Connection closed.
+ERROR:root:Connection closed: OSError(98, 'Address already in use')

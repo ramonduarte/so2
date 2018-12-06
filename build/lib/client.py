@@ -166,15 +166,13 @@ def echo_cmd():
 @click.option('--threads', '-t', default=1, help='Number of parallel executions.')
 @click.option('--infile', '-i', default="google_or_16", help='Filename to input graph.')
 @click.option('--outfile', '-o', default=None, help='Filename to write output.')
-@click.option('--demo', '-d', default=False, help='Set to True for a slower execution to illustrate functionality.')
-def hello(threads, infile, outfile, demo):
+def hello(threads, infile, outfile):
     click.echo('Running Potvin-Rousseau CVRPTW algorithm with ' + str(threads) + " threads.")
 
     global message, solutions
     message = {
         "threads": threads,
         "infile": infile,
-        "demo": demo,
         ## n -> int  =>  graph becomes n-graph
         "n": None,
         ## demands -> list([customer, demand])  =>  G.nodes[customer]["demand"] = demand
@@ -233,13 +231,15 @@ def hello(threads, infile, outfile, demo):
 
 if __name__ == "__main__":
     sock = socket.create_connection(('localhost', 8000))
+    sleep(2)
     while True:
         try:
             hello()
         except Exception as identifier:
             logging.error("Client failed: " + repr(identifier))
             print("Client failed: " + repr(identifier))
+            break
         finally:
             logging.info("Restarting client...")
-            break
+            # break
     
